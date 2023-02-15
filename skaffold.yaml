@@ -1,0 +1,174 @@
+apiVersion: skaffold/v2beta28 
+kind: Config	
+profiles:
+  - name: profile-stag
+    build:
+      tagPolicy:
+        gitCommit: {}
+      artifacts:
+      - image: [CONTAINER_REPO]
+        context: .
+        docker:
+          dockerfile: Dockerfile
+    deploy:
+        # Using Helm as the deployment strategy
+        statusCheckDeadlineSeconds: 300
+        helm:
+          # Pass the parameters according to  
+          releases:
+            - name: [IMAGE_NAME]
+              chartPath: ./helm-template
+              namespace: [NAMESPACE]
+              # Location of the chart - here, we use a local chart
+              wait: true
+              # Path to the values file
+              valuesFiles:
+              - ./stag.yaml
+              artifactOverrides:
+                image.repository: [CONTAINER_REPO]
+             
+          flags:
+            upgrade:
+              - --install
+  - name: profile-prod
+    build:
+      tagPolicy:
+        gitCommit: {}
+      artifacts:
+      - image: [CONTAINER_REPO]
+        context: .
+        docker:
+          dockerfile: Dockerfile
+    deploy:
+        # Using Helm as the deployment strategy
+        statusCheckDeadlineSeconds: 300
+        helm:
+          # Pass the parameters according to  
+          releases:
+            - name: [IMAGE_NAME]
+              chartPath: ./helm-template
+              namespace: [NAMESPACE]
+              # Location of the chart - here, we use a local chart
+              wait: true
+              # Path to the values file
+              valuesFiles:
+              - ./prod.yaml
+              artifactOverrides:
+                image.repository: [CONTAINER_REPO]
+             
+          flags:
+            upgrade:
+              - --install
+  - name: profile-worker-bg-stag
+    build:
+      tagPolicy:
+        gitCommit: {}
+      artifacts:
+      - image: [CONTAINER_REPO]
+        context: .
+        docker:
+          dockerfile: Dockerfile
+    deploy:
+        # Using Helm as the deployment strategy
+        statusCheckDeadlineSeconds: 300
+        helm:
+          # Pass the parameters according to  
+          releases:
+            - name: [IMAGE_NAME_WORKER_BG]
+              chartPath: ./helm-template
+              namespace: [NAMESPACE]
+              # Location of the chart - here, we use a local chart
+              wait: true
+              # Path to the values file
+              valuesFiles:
+              - ./worker-bg-stag.yaml
+              artifactOverrides:
+                image.repository: [CONTAINER_REPO]
+          flags:
+            upgrade:
+              - --install
+  - name: profile-worker-bgj-stag
+    build:
+      tagPolicy:
+        gitCommit: {}
+      artifacts:
+      - image: [CONTAINER_REPO]
+        context: .
+        docker:
+          dockerfile: Dockerfile
+    deploy:
+        # Using Helm as the deployment strategy
+        statusCheckDeadlineSeconds: 300
+        helm:
+          # Pass the parameters according to  
+          releases:
+            - name: [IMAGE_NAME_WORKER_bgj]
+              chartPath: ./helm-template
+              namespace: [NAMESPACE]
+              # Location of the chart - here, we use a local chart
+              wait: true
+              # Path to the values file
+              valuesFiles:
+              - ./worker-bgj-stag.yaml
+              artifactOverrides:
+                image.repository: [CONTAINER_REPO]
+          flags:
+            upgrade:
+              - --install
+
+  - name: profile-worker-bg-prod
+    build:
+      tagPolicy:
+        gitCommit: {}
+      artifacts:
+      - image: [CONTAINER_REPO]
+        context: .
+        docker:
+          dockerfile: Dockerfile
+    deploy:
+        # Using Helm as the deployment strategy
+        statusCheckDeadlineSeconds: 300
+        helm:
+          # Pass the parameters according to  
+          releases:
+            - name: [IMAGE_NAME_WORKER_BG]
+              chartPath: ./helm-template
+              namespace: [NAMESPACE]
+              # Location of the chart - here, we use a local chart
+              wait: true
+              # Path to the values file
+              valuesFiles:
+              - ./worker-bg-prod.yaml
+              artifactOverrides:
+                image.repository: [CONTAINER_REPO]
+          flags:
+            upgrade:
+              - --install
+  - name: profile-worker-bgj-prod
+    build:
+      tagPolicy:
+        gitCommit: {}
+      artifacts:
+      - image: [CONTAINER_REPO]
+        context: .
+        docker:
+          dockerfile: Dockerfile
+    deploy:
+        # Using Helm as the deployment strategy
+        statusCheckDeadlineSeconds: 300
+        helm:
+          # Pass the parameters according to  
+          releases:
+            - name: [IMAGE_NAME_WORKER_bgj]
+              chartPath: ./helm-template
+              namespace: [NAMESPACE]
+              # Location of the chart - here, we use a local chart
+              wait: true
+              # Path to the values file
+              valuesFiles:
+              - ./worker-bgj-prod.yaml
+              artifactOverrides:
+                image.repository: [CONTAINER_REPO]
+          flags:
+            upgrade:
+              - --install
