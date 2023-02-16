@@ -1,0 +1,8 @@
+.env
+.idea
+__pycache__
+env/
+venv/
+lib
+.gitmodules
+.DS_Store

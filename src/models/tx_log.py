@@ -9,7 +9,7 @@ from pymodm import fields
 
 from lib.enums.database import DBName
 from lib.model import BaseMG
-from lib.util import dt_utcnow
+from lib.utils import dt_utcnow
 
 
 class TxLogModel(BaseMG):

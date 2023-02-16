@@ -12,7 +12,7 @@ from pydash import get
 from pymongo import ReturnDocument
 
 from lib.logger import LoggerTask
-from lib.util import dt_utcnow
+from lib.utils import dt_utcnow
 from src.models.background_job import BackgroundJobModel
 from src.background_worker.script import run_background_job
 from bson import json_util, ObjectId

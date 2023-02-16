@@ -28,7 +28,7 @@ class ScriptBase(celery.Task):
             send_failed_event=send_failed_event,
             return_ok=return_ok
         )
-        logger.warning(
+        Logger.warning(
             'Failure detected for task %s',
             self.task.name
         )

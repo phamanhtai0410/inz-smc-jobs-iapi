@@ -22,7 +22,7 @@ from src.scripts.logger import LoggerTask
 # from lib.logger import LoggerTask
 
 # from lib.enums.database import DBName
-# from lib.util import dt_utcnow
+# from lib.utils import dt_utcnow
 from src.extensions import redis_cluster
 import sentry_sdk
 from hexbytes import HexBytes

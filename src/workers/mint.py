@@ -16,7 +16,7 @@ from pymongo import ReturnDocument
 from web3 import Web3
 
 from lib.logger import LoggerTask
-from lib.util import dt_utcnow
+from lib.utils import dt_utcnow
 from src.config import DefaultConfig
 from src.enums.mint import MintStatus, AssetType
 from src.extensions import bsc_web3
@@ -184,10 +184,10 @@ def on_mint_nft(event):
             "token_id": get(event, "args.tokenId")
         }
 
-        _response = requests.post(f'{DefaultConfig.IAPI_NFT_URI}/metadata/create', json=_metadata, timeout=10)
-        LoggerTask.debug(f'_response from metadata {_response.text}')
-        if _response.status_code != 200:
-            raise Exception(f'Create metadata error {_response.text}')
+        # _response = requests.post(f'{DefaultConfig.IAPI_NFT_URI}/metadata/create', json=_metadata, timeout=10)
+        # LoggerTask.debug(f'_response from metadata {_response.text}')
+        # if _response.status_code != 200:
+        #     raise Exception(f'Create metadata error {_response.text}')
         return 'done'
 
     except:

@@ -5,6 +5,7 @@ monkey.patch_all()
 
 from src import create_app
 from flask_script import Manager
+from src.config import DefaultConfig
 
 app = create_app()
 manager = Manager(app)
@@ -13,7 +14,7 @@ manager = Manager(app)
 @manager.command
 def run():
     """Run in local machine."""
-    app.run(host='0.0.0.0', debug=False)
+    app.run(host='0.0.0.0', port=DefaultConfig.APP_PORT, debug=False)
 
 
 manager.add_option('-c', '--config',
