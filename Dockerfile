@@ -1,4 +1,4 @@
-FROM 968557029040.dkr.ecr.ap-southeast-1.amazonaws.com/esollabs/cicd:inz-python-7dd9ebf-dirty
+FROM 968557029040.dkr.ecr.ap-southeast-1.amazonaws.com/esollabs/cicd:rinz-python-7dd9ebf-dirty
 
 RUN apk update && apk add --no-cache  tzdata git make  build-base supervisor
 
