@@ -19,7 +19,7 @@ from lib.logger import LoggerTask
 from lib.utils import dt_utcnow
 from src.config import DefaultConfig
 from src.enums.mint import MintStatus, AssetType
-from src.extensions import bsc_web3
+from src.extensions import bsc_web3, polygon_web3, ether_web3
 from src.models.background_job import BackgroundJobModel
 from src.models.campaign import CampaignModel
 from src.models.dev_wallet import DevWalletModel
@@ -33,9 +33,9 @@ from src.worker import worker
 
 
 @worker.task(name="worker.on_mint_nft", rate_limit='10000/s')
-def on_mint_nft(event):
+def on_mint_nft(event, chain_name="BSC"):
     try:
-        LoggerTask.debug(event)
+        LoggerTask.debug(event, chain_name)
         _tx_hash = get(event, 'transactionHash', '').lower()
         _contract = get(event, 'address').lower()
         _tx = TxLogModel.db().find_one_and_update(
@@ -76,9 +76,15 @@ def on_mint_nft(event):
             try:
 
                 if _backjob:
-                    bsc_contract = bsc_web3.eth.contract(Web3.toChecksumAddress(_contract), abi=get(_backjob, 'abi'))
-                    _tx = bsc_web3.eth.get_transaction_receipt(_tx_hash)
-                    _log_smc = bsc_contract.events.ActiveGiftCode().processReceipt(_tx)
+                    if chain_name == "BSC":
+                        chain_web3 = bsc_web3
+                    elif chain_name == "POLYGON":
+                        chain_web3 = polygon_web3
+                    else:
+                        chain_web3 = ether_web3
+                    chain_contract = chain_web3.eth.contract(Web3.toChecksumAddress(_contract), abi=get(_backjob, 'abi'))
+                    _tx = chain_web3.eth.get_transaction_receipt(_tx_hash)
+                    _log_smc = chain_contract.events.ActiveGiftCode().processReceipt(_tx)
                     if _log_smc:
                         _tx_info = json.loads(Web3.toJSON(_log_smc))
                         if isinstance(_tx_info, list) and _tx_info:
