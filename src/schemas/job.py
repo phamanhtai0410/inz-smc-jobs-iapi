@@ -26,7 +26,8 @@ class JobFormData(Schema):
     chain = fields.Str(
         validate=validate.OneOf([
             ChainCode.BSC,
-            ChainCode.AVAX
+            ChainCode.POLYGON,
+            ChainCode.ETHER,
         ])
     )
     task = fields.Str()

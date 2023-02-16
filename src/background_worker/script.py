@@ -21,7 +21,8 @@ _dict = os.getcwd()
 def run_background_job(background_job):
     background_job = json_util.loads(background_job) if isinstance(background_job, str) else background_job
     _bg_id = get(background_job, '_id')
-    LoggerTask.debug(f"Start bg: {get(background_job, 'contract')} with event {get(background_job, 'event')}")
+    _chain_name = get(background_job, 'chain')
+    LoggerTask.debug(f"Start bg: {get(background_job, 'contract')} with event {get(background_job, 'event')}, on chain: {_chain_name}")
 
     LoggerTask.debug(f"_dict {_dict}")
     _program = f'TASK_ID_{_bg_id}'
@@ -33,7 +34,7 @@ def run_background_job(background_job):
 
     if JobType.LISTEN_EVENT == get(background_job, 'type'):
         LoggerTask.debug("Run LISTEN_EVENT")
-        _command = f'python src/scripts/listener.py task_id={_bg_id}'
+        _command = f'python src/scripts/listener.py task_id={_bg_id} chain_name={_chain_name}'
     if not _command:
         raise Exception("Not found command")
 

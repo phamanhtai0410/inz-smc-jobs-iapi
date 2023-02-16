@@ -160,7 +160,6 @@ def run_listener(**kwargs):
     contract = kwargs['contract']
 
     providers = getattr(DefaultConfig, f'{kwargs["chain"]}_RPC_URIS')
-
     event = kwargs['event']
     abi = kwargs['abi']
     handle_func = kwargs['task']
@@ -193,7 +192,8 @@ for arg in sys.argv[1:]:
 
 if __name__ == "__main__":
     _bg_id = get(kw_dict, 'task_id')
-    LoggerTask.debug(f"[EVENT] Run task ____ {_bg_id}")
+    _chain_name = get(kw_dict, 'chain_name')
+    LoggerTask.debug(f"[EVENT] Run task ____ {_bg_id} ____  on chain {_chain_name}")
     background_job = BackgroundJobModel.db().find_one_and_update(filter={
         '_id': _bg_id if isinstance(_bg_id, ObjectId) else ObjectId(_bg_id)
     }, update={
