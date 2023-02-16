@@ -34,7 +34,7 @@ def run_background_job(background_job):
 
     if JobType.LISTEN_EVENT == get(background_job, 'type'):
         LoggerTask.debug("Run LISTEN_EVENT")
-        _command = f'python src/scripts/listener.py task_id={_bg_id} chain_name={_chain_name}'
+        _command = f'python src/scripts/listener.py task_id={_bg_id}'
     if not _command:
         raise Exception("Not found command")
 

@@ -19,5 +19,5 @@ redis_cluster = RedisCluster(
 # print('Init Redis user info successfully')
 dlm = Redlock(DefaultConfig.REDLOCK_REDIS, retry_count=2)
 bsc_web3 = Web3(Web3.HTTPProvider(DefaultConfig.BSC_RPC_URIS[0], request_kwargs={'timeout': 60})) 
-ether_web3 = Web3(Web3.HTTPProvider(DefaultConfig.ETH_RPC_URIS[0], request_kwargs={'timeout': 60})) 
+ether_web3 = Web3(Web3.HTTPProvider(DefaultConfig.ETHEREUM_RPC_URIS[0], request_kwargs={'timeout': 60})) 
 polygon_web3 = Web3(Web3.HTTPProvider(DefaultConfig.POLYGON_RPC_URIS[0], request_kwargs={'timeout': 60})) 

@@ -101,7 +101,7 @@ class EventListener():
         self.event = None
         self.contract = None
         self.provider = provider
-        self.web3 = Web3(Web3.HTTPProvider(provider, *args, **kwargs))
+        self.web3 = Web3(Web3.HTTPProvider(provider, *args, **kwargs)) 
 
     def set_handle(self, event, callback):
         self.event = event
@@ -112,7 +112,6 @@ class EventListener():
         self.contract = self.web3.eth.contract(address=Web3.toChecksumAddress(contract_address), abi=abi_file)
 
     def run(self, auto_remove_at=0) -> None:
-
         # asynchronous defined function to loop
         # this loop sets up an event filter and is looking for new entires for the "PairCreated" event
         # this loop runs on a poll interval
@@ -192,8 +191,7 @@ for arg in sys.argv[1:]:
 
 if __name__ == "__main__":
     _bg_id = get(kw_dict, 'task_id')
-    _chain_name = get(kw_dict, 'chain_name')
-    LoggerTask.debug(f"[EVENT] Run task ____ {_bg_id} ____  on chain {_chain_name}")
+    LoggerTask.debug(f"[EVENT] Run task ____ {_bg_id} ____ ")
     background_job = BackgroundJobModel.db().find_one_and_update(filter={
         '_id': _bg_id if isinstance(_bg_id, ObjectId) else ObjectId(_bg_id)
     }, update={

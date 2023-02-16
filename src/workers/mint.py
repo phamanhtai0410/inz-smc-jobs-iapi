@@ -59,47 +59,9 @@ def on_mint_nft(event, chain_name="BSC"):
             return f"Reject tx {_tx_hash}"
         _owner = get(event, 'args.to').lower()
         _uri = get(event, 'args.uri').lower()
-        _kolProfit = get(event, 'args.kolProfit')
-        _marketFee = get(event, 'args.marketFee')
         _upsert = True
         _active_code = False
         _asset = ''
-        if _kolProfit == 0 and _marketFee == 0:
-            # Check gift code
-            LoggerTask.debug("Is Gift code")
-            _upsert = False
-            _backjob = BackgroundJobModel.find_one({
-                'contract': _contract,
-                'task': "on_mint_nft",
-                "type": "LISTEN_EVENT"
-            })
-            try:
-
-                if _backjob:
-                    if chain_name == "BSC":
-                        chain_web3 = bsc_web3
-                    elif chain_name == "POLYGON":
-                        chain_web3 = polygon_web3
-                    else:
-                        chain_web3 = ether_web3
-                    chain_contract = chain_web3.eth.contract(Web3.toChecksumAddress(_contract), abi=get(_backjob, 'abi'))
-                    _tx = chain_web3.eth.get_transaction_receipt(_tx_hash)
-                    _log_smc = chain_contract.events.ActiveGiftCode().processReceipt(_tx)
-                    if _log_smc:
-                        _tx_info = json.loads(Web3.toJSON(_log_smc))
-                        if isinstance(_tx_info, list) and _tx_info:
-                            _tx_info = _tx_info[0]
-                            _active_code = get(_tx_info, 'args.giftCode')
-                            if 'ORDER' in _active_code:
-                                _active_code = _active_code.split("#")[1]
-                                _asset = AssetType.ORDER
-                            else:
-                                _asset = AssetType.GIFT_CODE
-
-            except:
-                traceback.print_exc()
-                sentry_sdk.capture_exception()
-
         _index_type = get(event, 'args.tokenType')
 
         _update = {

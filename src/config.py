@@ -50,7 +50,7 @@ class DefaultConfig(BaseConfig):
     # print("REDLOCK_REDIS ", REDLOCK_REDIS)
     BSC_RPC_URIS = json.loads(os.getenv('BSC_RPC_URIS'))
     AVAX_RPC_URIS = json.loads(os.getenv('AVAX_RPC_URIS'))
-    ETH_RPC_URIS = json.loads(os.getenv('ETH_RPC_URIS'))
+    ETHEREUM_RPC_URIS = json.loads(os.getenv('ETHEREUM_RPC_URIS'))
     POLYGON_RPC_URIS = json.loads(os.getenv('POLYGON_RPC_URIS'))
     CELERY_IMPORTS = ['src.workers', 'src.background_worker']
     IAPI_NFT_URI = os.getenv('IAPI_NFT_URI')
