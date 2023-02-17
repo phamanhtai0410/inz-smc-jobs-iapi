@@ -132,30 +132,32 @@ def on_mint_nft(event, chain_name="BSC"):
         except:
             sentry_sdk.capture_exception()
             traceback.print_exc()
+            
         # Init metadata link
-        _campaign = CampaignModel.find_one({
-            'contract': _contract
-        }, with_cache=False)
-        if not _campaign:
-            raise Exception(f'Not found campaign of address {_contract}')
-        _type = find(get(_campaign, 'nft_list'), lambda x: get(x, 'index_type') == _index_type)
-        if not _type:
-            raise Exception(f"Not found type of {_type}")
-        _metadata = {
-            "name": get(_type, 'name'),
-            "is_random": True if _index_type == 0 else False,
-            "price": get(_type, 'price'),
-            "type": get(_type, 'type'),
-            "description": get(_type, 'description'),
-            "tokenURI": get(_type, 'image_uri'),
-            "contract_address": get(event, 'address'),
-            "token_id": get(event, "args.tokenId")
-        }
+        # _campaign = CampaignModel.find_one({
+        #     'contract': _contract
+        # }, with_cache=False)
+        # if not _campaign:
+        #     raise Exception(f'Not found campaign of address {_contract}')
+        # _type = find(get(_campaign, 'nft_list'), lambda x: get(x, 'index_type') == _index_type)
+        # if not _type:
+        #     raise Exception(f"Not found type of {_type}")
+        # _metadata = {
+        #     "name": get(_type, 'name'),
+        #     "is_random": True if _index_type == 0 else False,
+        #     "price": get(_type, 'price'),
+        #     "type": get(_type, 'type'),
+        #     "description": get(_type, 'description'),
+        #     "tokenURI": get(_type, 'image_uri'),
+        #     "contract_address": get(event, 'address'),
+        #     "token_id": get(event, "args.tokenId")
+        # }
 
         # _response = requests.post(f'{DefaultConfig.IAPI_NFT_URI}/metadata/create', json=_metadata, timeout=10)
         # LoggerTask.debug(f'_response from metadata {_response.text}')
         # if _response.status_code != 200:
         #     raise Exception(f'Create metadata error {_response.text}')
+        
         return 'done'
 
     except:

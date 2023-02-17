@@ -7,7 +7,7 @@ from lib.utils import dt_utcnow
 
 class CampaignModel(BaseMG):
     class Meta:
-        collection_name = 'campaign'
+        collection_name = 'nft_contracts'
         final = True
         ignore_unknown_fields = True
         connection_alias = DBName.DAPP
