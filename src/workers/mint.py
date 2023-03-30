@@ -21,10 +21,10 @@ from src.config import DefaultConfig
 from src.enums.mint import MintStatus, AssetType
 from src.extensions import bsc_web3, polygon_web3, ether_web3
 from src.models.background_job import BackgroundJobModel
-from src.models.campaign import CampaignModel
 from src.models.dev_wallet import DevWalletModel
 from src.models.mint_log import MintLogModel
 from src.models.nft import NFTModel
+from src.models.nft_contracts import NftContractModel
 from src.models.supply import SupplyNFTModel
 from src.models.tx_log import TxLogModel
 from src.models.user import UserModel
@@ -44,7 +44,7 @@ def on_mint_nft(event, chain_name="BSC"):
             },
             update=[{
                 '$set': {
-                    'tx_type': "Mint",
+                    'tx_type': "TokenCreated",
                     'contract': _contract,
                     'event': json.dumps(event),
                     'block_number': get(event, 'blockNumber'),
@@ -58,7 +58,7 @@ def on_mint_nft(event, chain_name="BSC"):
         if _tx:
             return f"Reject tx {_tx_hash}"
         _owner = get(event, 'args.to').lower()
-        _uri = get(event, 'args.uri').lower()
+        _token_id = get(event, 'args.tokenId')
         _upsert = True
         _active_code = False
         _asset = ''
@@ -68,7 +68,6 @@ def on_mint_nft(event, chain_name="BSC"):
             "on_market": False,
             "mint_status": MintStatus.MINTED,
             'type': _index_type,
-            'metadata_link': _uri,
             'updated_time': dt_utcnow(),
             "created_time": {"$cond": [{"$not": ["$created_time"]}, dt_utcnow(), "$created_time"]}
         }
@@ -112,7 +111,7 @@ def on_mint_nft(event, chain_name="BSC"):
 
         _filter = {
             'contract': _contract,
-            'token_id': get(event, "args.tokenId")
+            'token_id': _token_id
         }
 
         _bf = NFTModel.db().find_one_and_update(filter=_filter, update=[{
@@ -134,29 +133,34 @@ def on_mint_nft(event, chain_name="BSC"):
             traceback.print_exc()
             
         # Init metadata link
-        # _campaign = CampaignModel.find_one({
-        #     'contract': _contract
-        # }, with_cache=False)
-        # if not _campaign:
-        #     raise Exception(f'Not found campaign of address {_contract}')
-        # _type = find(get(_campaign, 'nft_list'), lambda x: get(x, 'index_type') == _index_type)
-        # if not _type:
-        #     raise Exception(f"Not found type of {_type}")
-        # _metadata = {
-        #     "name": get(_type, 'name'),
-        #     "is_random": True if _index_type == 0 else False,
-        #     "price": get(_type, 'price'),
-        #     "type": get(_type, 'type'),
-        #     "description": get(_type, 'description'),
-        #     "tokenURI": get(_type, 'image_uri'),
-        #     "contract_address": get(event, 'address'),
-        #     "token_id": get(event, "args.tokenId")
-        # }
+        _contract_detail = NftContractModel.find_one({
+            'contract': _contract
+        }, with_cache=False)
+        if not _contract_detail:
+            raise Exception(f'Not found nft contract of address {_contract}')
+        _type = find(get(_contract_detail, 'nft_list'), lambda x: get(x, 'index_type') == _index_type)
+        if not _type:
+            raise Exception(f"Not found type of {_type}")
 
-        # _response = requests.post(f'{DefaultConfig.IAPI_NFT_URI}/metadata/create', json=_metadata, timeout=10)
-        # LoggerTask.debug(f'_response from metadata {_response.text}')
-        # if _response.status_code != 200:
-        #     raise Exception(f'Create metadata error {_response.text}')
+        _metadata = {
+            'name': get(_type, 'name', ''),
+            'image_url': get(_type, 'image_url', ''),
+            'description': get(_type, 'description', ''),
+            'type': get(_type, 'type'),
+            'attributes': get(_type, 'properties', []),
+            'actions': get(_type, 'actions', []),
+        }
+
+        _data = {
+            'contract': _contract,
+            'token_id': _token_id,
+            'metadata': _metadata
+        }
+
+        _response = requests.post(f'{DefaultConfig.IAPI_STORAGE_URI}/metadata', json=_data, timeout=30)
+        LoggerTask.debug(f'_response from metadata {_response.text}')
+        if _response.status_code != 200:
+            raise Exception(f'Create metadata error {_response.text}')
         
         return 'done'
 

@@ -33,7 +33,7 @@ class JobService(object):
                 'interval': form_data['interval'],
                 'abi': form_data['abi'],
                 'from_block': form_data['from_block'],
-                'auto_remove_at': form_data['auto_remove_at']
+                'auto_remove_at': 0
             }
         }, upsert=True, return_document=ReturnDocument.AFTER)
         if not _job.get('active'):

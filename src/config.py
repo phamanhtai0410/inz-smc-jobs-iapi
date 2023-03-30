@@ -53,4 +53,4 @@ class DefaultConfig(BaseConfig):
     ETHEREUM_RPC_URIS = json.loads(os.getenv('ETHEREUM_RPC_URIS'))
     POLYGON_RPC_URIS = json.loads(os.getenv('POLYGON_RPC_URIS'))
     CELERY_IMPORTS = ['src.workers', 'src.background_worker']
-    IAPI_NFT_URI = os.getenv('IAPI_NFT_URI')
+    IAPI_STORAGE_URI = os.getenv('IAPI_STORAGE_URI')
