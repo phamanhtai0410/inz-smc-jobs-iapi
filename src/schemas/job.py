@@ -7,7 +7,7 @@
 
 from marshmallow import Schema, EXCLUDE, fields, validate
 
-from lib.enums.chain import ChainCode
+from lib.enum import Chains
 from src.enums.job import JobType
 
 
@@ -25,9 +25,9 @@ class JobFormData(Schema):
     abi = fields.List(fields.Dict(), required=True)
     chain = fields.Str(
         validate=validate.OneOf([
-            ChainCode.BSC,
-            ChainCode.POLYGON,
-            ChainCode.ETHER,
+            Chains.BSC,
+            Chains.POLYGON,
+            Chains.ETHEREUM,
         ])
     )
     task = fields.Str()
