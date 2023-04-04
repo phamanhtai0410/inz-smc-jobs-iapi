@@ -18,6 +18,7 @@ from celery.signals import worker_ready
 import requests
 from models import BackgroundJobsModel
 
+
 @worker_ready.connect()
 def message_poll_start(sender=None, headers=None, body=None, **kwargs):
     # sleep for sure api start
