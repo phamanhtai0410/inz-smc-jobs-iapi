@@ -54,3 +54,4 @@ class DefaultConfig(BaseConfig):
     POLYGON_RPC_URIS = json.loads(os.getenv('POLYGON_RPC_URIS'))
     CELERY_IMPORTS = ['src.workers', 'src.background_worker']
     IAPI_STORAGE_URI = os.getenv('IAPI_STORAGE_URI')
+    SMC_JOBS_IAPI_URI = os.getenv('SMC_JOBS_IAPI_URI')
