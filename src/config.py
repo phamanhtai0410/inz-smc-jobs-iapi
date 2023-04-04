@@ -53,5 +53,5 @@ class DefaultConfig(BaseConfig):
     ETHEREUM_RPC_URIS = json.loads(os.getenv('ETHEREUM_RPC_URIS'))
     POLYGON_RPC_URIS = json.loads(os.getenv('POLYGON_RPC_URIS'))
     CELERY_IMPORTS = ['src.workers', 'src.background_worker']
-    IAPI_STORAGE_URI = os.getenv('IAPI_STORAGE_URI')
-    SMC_JOBS_IAPI_URI = os.getenv('SMC_JOBS_IAPI_URI')
+    IAPI_STORAGE_URL = os.getenv('IAPI_STORAGE_URL')
+    SMC_JOBS_IAPI_URL = os.getenv('SMC_JOBS_IAPI_URL')

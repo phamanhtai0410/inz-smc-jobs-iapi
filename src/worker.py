@@ -23,5 +23,5 @@ def message_poll_start(sender=None, headers=None, body=None, **kwargs):
     # sleep for sure api start
     time.sleep(60)
     print('-'*10, 'WORKER START', '-'*10)
-    requests.post(f'{DefaultConfig.SMC_JOBS_IAPI_URI}/background/restart')
+    requests.post(f'{DefaultConfig.SMC_JOBS_IAPI_URL}/background/restart')
     print('-'*10, 'DONE RESTART WORKER', '-'*10)

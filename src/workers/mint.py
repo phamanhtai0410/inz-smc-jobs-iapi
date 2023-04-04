@@ -157,7 +157,7 @@ def on_mint_nft(event, chain_name="BSC"):
             'metadata': _metadata
         }
 
-        _response = requests.post(f'{DefaultConfig.IAPI_STORAGE_URI}/metadata', json=_data, timeout=30)
+        _response = requests.post(f'{DefaultConfig.IAPI_STORAGE_URL}/metadata', json=_data, timeout=30)
         LoggerTask.debug(f'_response from metadata {_response.text}')
         if _response.status_code != 200:
             raise Exception(f'Create metadata error {_response.text}')
