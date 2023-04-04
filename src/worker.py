@@ -16,7 +16,6 @@ worker = create_worker(DefaultConfig)
 
 from celery.signals import worker_ready
 import requests
-from models import BackgroundJobsModel
 
 
 @worker_ready.connect()
