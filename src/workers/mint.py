@@ -161,6 +161,14 @@ def on_mint_nft(event, chain_name="BSC"):
         LoggerTask.debug(f'_response from metadata {_response.text}')
         if _response.status_code != 200:
             raise Exception(f'Create metadata error {_response.text}')
+
+        _token_metadata_url = get(_response.json(), 'data.url')
+
+        NFTModel.db().find_one_and_update(filter=_filter, update=[{
+            "$set": {
+                'metadata_link': _token_metadata_url
+            }
+        }])
         
         return 'done'
 
