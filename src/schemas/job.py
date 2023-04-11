@@ -7,7 +7,7 @@
 
 from marshmallow import Schema, EXCLUDE, fields, validate
 
-from lib.enum import Chains
+from lib import Chains
 from src.enums.job import JobType
 
 
@@ -28,6 +28,8 @@ class JobFormData(Schema):
             Chains.BSC,
             Chains.POLYGON,
             Chains.ETHEREUM,
+            Chains.BASE,
+            Chains.SCROLL,
         ])
     )
     task = fields.Str()
