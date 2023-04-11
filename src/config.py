@@ -52,6 +52,8 @@ class DefaultConfig(BaseConfig):
     AVAX_RPC_URIS = json.loads(os.getenv('AVAX_RPC_URIS'))
     ETHEREUM_RPC_URIS = json.loads(os.getenv('ETHEREUM_RPC_URIS'))
     POLYGON_RPC_URIS = json.loads(os.getenv('POLYGON_RPC_URIS'))
+    BASE_RPC_URIS = json.loads(os.getenv('BASE_RPC_URIS'))
+    SCROLL_RPC_URIS = json.loads(os.getenv('SCROLL_RPC_URIS'))
     CELERY_IMPORTS = ['src.workers', 'src.background_worker']
     IAPI_STORAGE_URL = os.getenv('IAPI_STORAGE_URL')
     SMC_JOBS_IAPI_URL = os.getenv('SMC_JOBS_IAPI_URL')
