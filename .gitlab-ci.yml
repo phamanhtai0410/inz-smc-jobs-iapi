@@ -4,13 +4,18 @@ variables:
   APP_NAME_API: inz-smc-jobs-iapi
   APP_NAME_API_WORKER: inz-smc-jobs-iapi-worker
   APP_NAME_API_SUPERVISOR: inz-smc-jobs-iapi-supervisor
+  CONTAINER_REPO_ASIA_TESTNET: 968557029040.dkr.ecr.ap-southeast-1.amazonaws.com/test/inz-smc-jobs-iapi
 
   CONTAINER_REPO_ASIA_STAG: 968557029040.dkr.ecr.ap-southeast-1.amazonaws.com/stag/inz-smc-jobs-iapi
  # CONTAINER_REPO_ASIA_PROD: harbor.atomsolution.vn/pos/gw_transaaction_service
   NAMESPACE_STAG: inz-api-stag
+  NAMESPACE_TESTNET: inz-api-testnet
+
   NAMESPACE_PROD: gateway
 
   HELM_VALUE_FOLDER: inz
+  FULLREPO_ASIA_TESTNET: $CONTAINER_REPO_ASIA_TESTNET:$CI_COMMIT_SHA
+
   FULLREPO_ASIA_STAG: $CONTAINER_REPO_ASIA_STAG:$CI_COMMIT_SHA
   FULLREPO_ASIA_PROD: $CONTAINER_REPO_ASIA_PROD:$CI_COMMIT_SHA
   HELM_VALUE: ${CI_COMMIT_REF_NAME}
@@ -33,7 +38,10 @@ stages:
   - deploy
 
 .kubectl_config: &kubectl_config
-  
+  - |
+      if [ "$CI_COMMIT_REF_NAME" == "testnet" ]; then
+        aws eks --region $AWS_REGION update-kubeconfig --name esol-staging-cluster
+      fi
   - |
       if [ "$CI_COMMIT_REF_NAME" == "stag" ]; then
         aws eks --region $AWS_REGION update-kubeconfig --name esol-staging-cluster
@@ -162,3 +170,118 @@ deploy_APP_NAME_API_SUPERVISOR_stag:
   only:
     refs:
       - stag
+
+build_testnet:
+  image: docker:19.03.1
+  tags:
+  - esol-stag-test
+  stage: build
+  services:
+  - docker:19.03.1-dind
+  cache:
+    key: $CI_COMMIT_REF_SLUG
+    paths:
+    - ./node_modules/
+  before_script:
+    - apk add --no-cache curl jq python py-pip wget git bash
+    - pip install awscli 
+    - git submodule add -f --branch stag https://read-token:$GITLAB_TOKEN@gitlab.rinznetwork.com/inz/inz-lib.git lib
+    - git submodule sync --recursive
+    - git submodule update --init --remote --recursive
+
+    - export VERIFY_CHECKSUM=false && curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 && chmod +x ./get_helm.sh && ./get_helm.sh
+    - curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/v1.38.0/skaffold-linux-amd64 && chmod +x skaffold &&  mv skaffold /usr/local/bin
+    - git submodule sync --recursive
+    - git submodule update --init --remote --recursive
+  script:
+    - docker login -u AWS -p $(aws ecr get-login-password --region $AWS_REGION) $CONTAINER_REPO_ASIA_STAG
+    - |
+      if [ "$CI_COMMIT_REF_NAME" == "testnet" ]; then
+        sed -i -e "s#\[NAMESPACE\]#$NAMESPACE_TESTNET#g" skaffold.yaml
+        sed -i -e "s#\[CONTAINER_REPO\]#$CONTAINER_REPO_ASIA_TESTNET#g" skaffold.yaml
+        sed -i -e "s#\[APP_NAME\]#$IMAGE_NAME#g" skaffold.yaml
+        sed -i -e "s#\[CI_COMMIT_REF_NAME\]#$CI_COMMIT_REF_NAME#g" skaffold.yaml
+        cat skaffold.yaml
+      fi
+    - /usr/local/bin/skaffold build -p profile-stag --file-output=build_sync.json
+  only:
+    refs:
+      - testnet
+  artifacts:
+    paths:
+    - build_sync.json
+
+deploy_APP_NAME_API_testnet:
+  stage: deploy
+  image:  alpine/helm:3.2.1
+  tags:
+  - esol-stag
+  script:
+    - *predeploy
+    - *kubectl_config
+    - |
+      if [ "$CI_COMMIT_REF_NAME" == "testnet" ]; then
+        sed -i -e "s#\[NAMESPACE\]#$NAMESPACE_TESTNET#g" skaffold.yaml
+        sed -i -e "s#\[APP_NAME\]#$APP_NAME_API#g" skaffold.yaml
+        sed -i -e "s#\[CONTAINER_REPO\]#$CONTAINER_REPO_ASIA_TESTNET#g" skaffold.yaml
+        sed -i -e "s#\[CI_COMMIT_REF_NAME\]#$CI_COMMIT_REF_NAME#g" skaffold.yaml
+      fi
+    - git clone https://read-token:$GITLAB_TOKEN@gitlab.rinznetwork.com/rinz-io-devops/helm-value/$HELM_VALUE_FOLDER/$IMAGE_NAME.git
+    - mv $IMAGE_NAME/${APP_NAME_API}-testnet.yaml .
+    - curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.24.0/bin/linux/amd64/kubectl && chmod +x ./kubectl && mv ./kubectl /usr/local/bin/kubectl
+    - curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/v1.38.0/skaffold-linux-amd64 && chmod +x skaffold &&  mv skaffold /usr/local/bin
+    - /usr/local/bin/skaffold deploy -p profile-${APP_NAME_API}-testnet   -a build_sync.json
+
+  only:
+    refs:
+      - testnet
+
+deploy_APP_NAME_API_WORKER_testnet:
+  stage: deploy
+  image:  alpine/helm:3.2.1
+  tags:
+  - esol-stag
+  script:
+    - *predeploy
+    - *kubectl_config
+    - |
+      if [ "$CI_COMMIT_REF_NAME" == "testnet" ]; then
+        sed -i -e "s#\[NAMESPACE\]#$NAMESPACE_TESTNET#g" skaffold.yaml
+        sed -i -e "s#\[APP_NAME\]#$APP_NAME_API_WORKER#g" skaffold.yaml
+        sed -i -e "s#\[CONTAINER_REPO\]#$CONTAINER_REPO_ASIA_TESTNET#g" skaffold.yaml
+        sed -i -e "s#\[CI_COMMIT_REF_NAME\]#$CI_COMMIT_REF_NAME#g" skaffold.yaml
+      fi
+    - git clone https://read-token:$GITLAB_TOKEN@gitlab.rinznetwork.com/rinz-io-devops/helm-value/$HELM_VALUE_FOLDER/$IMAGE_NAME.git
+    - mv $IMAGE_NAME/${APP_NAME_API_WORKER}-testnet.yaml .
+    - curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.24.0/bin/linux/amd64/kubectl && chmod +x ./kubectl && mv ./kubectl /usr/local/bin/kubectl
+    - curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/v1.38.0/skaffold-linux-amd64 && chmod +x skaffold &&  mv skaffold /usr/local/bin
+    - /usr/local/bin/skaffold deploy -p profile-${APP_NAME_API_WORKER}-testnet   -a build_sync.json
+
+  only:
+    refs:
+      - testnet
+
+deploy_APP_NAME_API_SUPERVISOR_testnet:
+  stage: deploy
+  image:  alpine/helm:3.2.1
+  tags:
+  - esol-stag
+  script:
+    - *predeploy
+    - *kubectl_config
+    - |
+      if [ "$CI_COMMIT_REF_NAME" == "testnet" ]; then
+        sed -i -e "s#\[NAMESPACE\]#$NAMESPACE_TESTNET#g" skaffold.yaml
+        sed -i -e "s#\[APP_NAME\]#$APP_NAME_API_SUPERVISOR#g" skaffold.yaml
+        sed -i -e "s#\[CONTAINER_REPO\]#$CONTAINER_REPO_ASIA_TESTNET#g" skaffold.yaml
+        sed -i -e "s#\[CI_COMMIT_REF_NAME\]#$CI_COMMIT_REF_NAME#g" skaffold.yaml
+      fi
+    - git clone https://read-token:$GITLAB_TOKEN@gitlab.rinznetwork.com/rinz-io-devops/helm-value/$HELM_VALUE_FOLDER/$IMAGE_NAME.git
+    - mv $IMAGE_NAME/${APP_NAME_API_SUPERVISOR}-testnet.yaml .
+    - curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.24.0/bin/linux/amd64/kubectl && chmod +x ./kubectl && mv ./kubectl /usr/local/bin/kubectl
+    - curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/v1.38.0/skaffold-linux-amd64 && chmod +x skaffold &&  mv skaffold /usr/local/bin
+    - /usr/local/bin/skaffold deploy -p profile-${APP_NAME_API_SUPERVISOR}-testnet   -a build_sync.json
+
+  only:
+    refs:
+      - testnet
