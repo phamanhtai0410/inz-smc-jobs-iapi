@@ -159,7 +159,7 @@ def on_mint_nft(event, chain_name="BSC"):
         }
 
         if _callback_url != "":
-            on_callback_url.delay(_callback_url, _data, chain_name)        
+            on_callback_url.delay(_callback_url, _data, chain_name)
         _response = requests.post(f'{DefaultConfig.IAPI_STORAGE_URL}/metadata', json=_data, timeout=30)
         LoggerTask.debug(f'_response from metadata {_response.text}')
         if _response.status_code != 200:
@@ -185,12 +185,13 @@ def on_mint_nft(event, chain_name="BSC"):
 def on_callback_url(self, _callback_url, _data, _chain_name):
     try:
         LoggerTask.debug(_data)
-        _data = json.loads(_data)
+        # _data = json.loads(_data)
         _data['chain_name'] = _chain_name
+        _dump_data = json.dumps(_data)
         requests.post(
             url=_callback_url, 
-            json=_data,
-            headers={"Content-Type":"application/json"}
+            json=_dump_data,
+            headers={"Content-Type": "application/json"}
         )
         return "CallBack API Success"
     except Exception as exc:
