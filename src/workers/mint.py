@@ -76,7 +76,7 @@ def on_mint_nft(event, chain_name="BSC"):
             'public_address': _owner
         }, with_cache=False)
         _user_id = None
-
+        _callback_url = ""
         if not _is_dev:
 
             _wallet_owner = WalletModel.find_one(filter={
@@ -96,7 +96,6 @@ def on_mint_nft(event, chain_name="BSC"):
             else:
                 _user_id = _wallet_owner['user'] if isinstance(_wallet_owner['user'], ObjectId) else ObjectId(
                     _wallet_owner['user'])
-
             _update['user'] = _user_id
         else:
             _update['keep'] = True
@@ -156,7 +155,8 @@ def on_mint_nft(event, chain_name="BSC"):
             'token_id': _token_id,
             'metadata': _metadata
         }
-
+        if _callback_url != "":
+            on_callback_url.delay(_callback_url, _data, chain_name)        
         _response = requests.post(f'{DefaultConfig.IAPI_STORAGE_URL}/metadata', json=_data, timeout=30)
         LoggerTask.debug(f'_response from metadata {_response.text}')
         if _response.status_code != 200:
@@ -176,3 +176,24 @@ def on_mint_nft(event, chain_name="BSC"):
         sentry_sdk.capture_exception()
         traceback.print_exc()
         return "Fail"
+
+
+@worker.task(bind=True, name="worker.on_callback_url", rate_limit='10000/s', max_retries=3)
+def on_callback_url(self, _callback_url, _data, _chain_name):
+    try:
+        LoggerTask.debug(_data)
+        _data = json.loads(_data)
+        _data['chain_name'] = _chain_name
+        requests.post(
+            url=_callback_url, 
+            json=_data,
+            headers={"Content-Type":"application/json"}
+        )
+        return "CallBack API Success"
+    except Exception as exc:
+        self.retry(countdown=2, exc=exc)
+        sentry_sdk.capture_exception()
+        traceback.print_exc()
+        return "CallBack API Failed"
+    
+    

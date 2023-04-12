@@ -40,6 +40,7 @@ class DefaultConfig(BaseConfig):
     BG_CELERY_DEFAULT_QUEUE = 'background-queue'
     CELERY_ROUTES = {
         'worker.on_mint_nft': {'queue': CELERY_DEFAULT_QUEUE},
+        'worker.on_callback_url': {'queue': CELERY_DEFAULT_QUEUE},
         'worker.run_background_jobs': {'queue': BG_CELERY_DEFAULT_QUEUE},
     }
 
