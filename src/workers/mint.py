@@ -72,33 +72,35 @@ def on_mint_nft(event, chain_name="BSC"):
             "created_time": {"$cond": [{"$not": ["$created_time"]}, dt_utcnow(), "$created_time"]}
         }
 
-        _is_dev = DevWalletModel.find_one(filter={
+        # _is_dev = DevWalletModel.find_one(filter={
+        #     'public_address': _owner
+        # }, with_cache=False)
+        _callback_url = ""
+        # if not _is_dev:
+
+        _wallet_owner = WalletModel.find_one(filter={
             'public_address': _owner
         }, with_cache=False)
-        _user_id = None
-        _callback_url = ""
-        if not _is_dev:
+        _user_id = get(_wallet_owner, 'user')
+        _user = UserModel.find_one(filter={'_id': _user_id})
+        _callback_url = get(_user, 'callback_url', '')
+        # if not _wallet_owner:
+        #     _user = UserModel.insert({
+        #         "public_address": _owner
+        #     })
+        #     _user_id = get(_user, '_id')
+        #     WalletModel.insert({
+        #         'public_address': _owner,
+        #         'user': _user_id,
+        #         'active': True
+        #     })
+        # else:
+        #     _user_id = _wallet_owner['user'] if isinstance(_wallet_owner['user'], ObjectId) else ObjectId(
+        #         _wallet_owner['user'])
+        _update['user'] = _user_id
 
-            _wallet_owner = WalletModel.find_one(filter={
-                'public_address': _owner
-            }, with_cache=False)
-
-            if not _wallet_owner:
-                _user = UserModel.insert({
-                    "public_address": _owner
-                })
-                _user_id = _user._id
-                WalletModel.insert({
-                    'public_address': _owner,
-                    'user': _user_id,
-                    'active': True
-                })
-            else:
-                _user_id = _wallet_owner['user'] if isinstance(_wallet_owner['user'], ObjectId) else ObjectId(
-                    _wallet_owner['user'])
-            _update['user'] = _user_id
-        else:
-            _update['keep'] = True
+        # else:
+        #     _update['keep'] = True
 
         if _active_code:
             if _asset:
@@ -155,6 +157,7 @@ def on_mint_nft(event, chain_name="BSC"):
             'token_id': _token_id,
             'metadata': _metadata
         }
+
         if _callback_url != "":
             on_callback_url.delay(_callback_url, _data, chain_name)        
         _response = requests.post(f'{DefaultConfig.IAPI_STORAGE_URL}/metadata', json=_data, timeout=30)
